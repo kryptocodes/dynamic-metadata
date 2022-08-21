@@ -22,44 +22,46 @@ const App = () => {
     wind: 0,
     description: ''
   });
-
-  useEffect(() => {
-    fetch('https://api.ipify.org?format=json')
-      .then(res => res.json())
-      .then(data => {
-        setIp(data.ip);
-        fetch('http://ip-api.com/json/' + data.ip).then(res => res.json()).then(data => {
-        setCountry(data.country);
-        console.log(data);
-        setLocation({
-          lat: data.lat,
-          lng: data.lon
-        });
-        //get weather
-        fetch('https://api.openweathermap.org/data/2.5/weather?lat=' + data.lat + '&lon=' + data.lon + '&appid=b045804ab93431828b3e101e2be26dc1')
-          .then(res => res.json())
-          .then(data => {
-            console.log(data);
-            setWeather({
-              temp: data.main.temp,
-              temp_min: data.main.temp_min,
-              temp_max: data.main.temp_max,
-              humidity: data.main.humidity,
-              pressure: data.main.pressure,
-              wind: data.wind.speed,
-              description: data.weather[0].description
-            });
-          }).catch(err => {
-            console.log(err);
-          })
-        fetch('https://api.sunrise-sunset.org/json?lat=' + data.lat + '&lng=' + data.lon).then(res => res.json()).then(data => {
-          setSun({
-            sunrise: data.results.sunrise,
-            sunset: data.results.sunset
+  const APICALL = async() => {
+    await fetch('https://api.ipify.org?format=json')
+    .then(res => res.json())
+    .then(async(data) => {
+      setIp(data.ip);
+      await fetch('https://ipapi.co/' + data.ip + "/json").then(res => res.json()).then(async(data) => {
+      setCountry(data.country);
+      console.log(data.latitude);
+      setLocation({
+        lat: data.latitude,
+        lng: data.longitude
+      });
+      //get weather
+      await fetch('https://api.openweathermap.org/data/2.5/weather?lat=' + data.latitude + '&lon=' + data.longitude + '&appid=b045804ab93431828b3e101e2be26dc1')
+        .then(res => res.json())
+        .then(data => {
+          console.log(data);
+          setWeather({
+            temp: data.main.temp,
+            temp_min: data.main.temp_min,
+            temp_max: data.main.temp_max,
+            humidity: data.main.humidity,
+            pressure: data.main.pressure,
+            wind: data.wind.speed,
+            description: data.weather[0].description
           });
-        }).catch(err => console.log(err));
+        }).catch(err => {
+          console.log(err);
+        })
+      await fetch('https://api.sunrise-sunset.org/json?lat=' + data.latitude + '&lng=' + data.longitude).then(res => res.json()).then(data => {
+        setSun({
+          sunrise: data.results.sunrise,
+          sunset: data.results.sunset
+        });
       }).catch(err => console.log(err));
-      }).catch(err => console.log(err));
+    }).catch(err => console.log(err));
+    }).catch(err => console.log(err));
+  }
+  useEffect(() => {
+    APICALL();
   }
   , []);
   return (
